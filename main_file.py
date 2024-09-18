@@ -108,13 +108,14 @@ def ml_prediction(technique, X_train, X_test, y_train, y_test):
   The result is the average of R^2 scores
   """
 
-  targets = y_test
+  targets = y_test.copy()
+
+  targets = [element*100 for element in targets]
 
   rmse_avg = [0] * 30
   mse_avg = [0] * 30
   mae_avg = [0] * 30
   r2_avg = [0] * 30
-  r_score_avg = [0] * 30
 
   for seed in range(1, 31):
 
@@ -140,13 +141,17 @@ def ml_prediction(technique, X_train, X_test, y_train, y_test):
     model.fit(X_train, y_train)
     pred_WQI = model.predict(X_test) # predicted WQI
 
+    
+    # Rescale WQI (both real and predicted) values to 0-100 scale
+    pred_WQI = [element*100 for element in pred_WQI]
+
     rmse_avg[seed-1] = root_mean_squared_error(targets, pred_WQI)
     mse_avg[seed-1] = mean_squared_error(targets, pred_WQI)
     mae_avg[seed-1] = mean_absolute_error(targets, pred_WQI)
     r2_avg[seed-1] = r2_score(targets, pred_WQI)
-    r_score_avg[seed-1] = np.sqrt(r2_score(targets, pred_WQI))
-
-  return model, pred_WQI, rmse_avg, mse_avg, mae_avg, r2_avg, r_score_avg  # instance, array, array, array, ...
+    
+    
+  return model, pred_WQI, rmse_avg, mse_avg, mae_avg, r2_avg  # instance, array, array, array, ...
 
 def store_metrics(row_index, svm_metrics_list, rf_metrics_list, dt_metrics_list, mlp_metrics_list, svm_metrics_values, rf_metrics_values, dt_metrics_values, mlp_metrics_values):
   """
@@ -155,12 +160,12 @@ def store_metrics(row_index, svm_metrics_list, rf_metrics_list, dt_metrics_list,
   Returns an array for each evaluation metrics with the respective results
   """
 
-  svm_metrics_list.append({"RMSE": svm_metrics_values[0], "MSE": svm_metrics_values[1], "MAE": svm_metrics_values[2], "R2": svm_metrics_values[3], "R": svm_metrics_values[4]})
+  svm_metrics_list.append({"RMSE": svm_metrics_values[0], "MSE": svm_metrics_values[1], "MAE": svm_metrics_values[2], "R2": svm_metrics_values[3]})
 
-  rf_metrics_list.append({"RMSE": rf_metrics_values[0], "MSE": rf_metrics_values[1], "MAE": rf_metrics_values[2], "R2": rf_metrics_values[3], "R": rf_metrics_values[4]})
+  rf_metrics_list.append({"RMSE": rf_metrics_values[0], "MSE": rf_metrics_values[1], "MAE": rf_metrics_values[2], "R2": rf_metrics_values[3]})
 
-  dt_metrics_list.append({"RMSE": dt_metrics_values[0], "MSE": dt_metrics_values[1], "MAE": dt_metrics_values[2], "R2": dt_metrics_values[3], "R": dt_metrics_values[4]})
+  dt_metrics_list.append({"RMSE": dt_metrics_values[0], "MSE": dt_metrics_values[1], "MAE": dt_metrics_values[2], "R2": dt_metrics_values[3]})
 
-  mlp_metrics_list.append({"RMSE": mlp_metrics_values[0], "MSE": mlp_metrics_values[1], "MAE": mlp_metrics_values[2], "R2": mlp_metrics_values[3], "R": mlp_metrics_values[4]})                              
+  mlp_metrics_list.append({"RMSE": mlp_metrics_values[0], "MSE": mlp_metrics_values[1], "MAE": mlp_metrics_values[2], "R2": mlp_metrics_values[3]})                              
 
   return svm_metrics_list, rf_metrics_list, dt_metrics_list, mlp_metrics_list
